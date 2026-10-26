@@ -1,3 +1,4 @@
+
 name: Build SmartFridge APK
 
 on:
@@ -6,15 +7,12 @@ on:
     branches:
       - main
 
-permissions:
-  contents: read
-
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
 
     steps:
-      - name: Download project files
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Set up Java
@@ -25,15 +23,18 @@ jobs:
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK packages
+        run: sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Build APK
+        run: gradle assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
         with:
-          cmdline-tools-version: '11076708'
-
-      - name: Install Android build tools
-        run: |
-          sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
-
-      - name: Check project files
-        run: |
-          echo "Repository files:"
-          ls -la
-          find . -maxdepth 3 -type f | head -100
+          name: SmartFridge-debug-APK
+          path: app/build/outputs/apk/debug/app-debug.apk
